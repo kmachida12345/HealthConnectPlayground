@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.github.kmachida12345.healthconnectplayground.ui.theme.StepsRecordListScreen
+import com.github.kmachida12345.healthconnectplayground.ui.theme.DailyRecordsScreen
 
 @Composable
 fun HcpNavHost(
@@ -21,10 +21,13 @@ fun HcpNavHost(
         startDestination = startDestination
     ) {
         composable("main") {
-            Greeting("hogeee", {navController.navigate("hoge")})
+            Greeting("hogeee", {navController.navigate("hoge")}, {navController.navigate("annual")})
         }
         composable("hoge") {
-            StepsRecordListScreen()
+            DailyRecordsScreen()
+        }
+        composable("annual") {
+            AnnualRecordsScreen()
         }
 
     }

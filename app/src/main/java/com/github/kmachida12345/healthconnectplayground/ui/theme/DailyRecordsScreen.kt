@@ -2,18 +2,27 @@ package com.github.kmachida12345.healthconnectplayground.ui.theme
 
 import android.util.Log
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDateTime
 
+sealed class RecordState {
+    object Init: RecordState()
+    class Fetched(val data: List<StepsRecord>): RecordState()
+}
+private val resFlow = MutableStateFlow<RecordState>(RecordState.Init)
+
 @Composable
-fun StepsRecordListScreen() {
+fun DailyRecordsScreen() {
     val healthConnectClient = HealthConnectClient.getOrCreate(LocalContext.current)
 
 
@@ -27,6 +36,7 @@ fun StepsRecordListScreen() {
                 timeRangeFilter = TimeRangeFilter.between(now.minusDays(1), now)
             )
         )
+        resFlow.value = RecordState.Fetched(response.records)
         for (stepRecord in response.records) {
             // Process each step record
             Log.d(
@@ -34,24 +44,15 @@ fun StepsRecordListScreen() {
                 "checkPermissionsAndRun: ${stepRecord.startTime}, ${stepRecord.endTime} ${stepRecord.count}"
             )
         }
-
-        val res = healthConnectClient.aggregate(
-            AggregateRequest(
-                metrics = setOf(StepsRecord.COUNT_TOTAL),
-                timeRangeFilter = TimeRangeFilter.between(now.minusYears(1), now)
-            )
-        )
-        // The result may be null if no data is available in the time range.
-        val stepsTotal = res[StepsRecord.COUNT_TOTAL]
-        Log.d("machida", "checkPermissionsAndRun: hoge $stepsTotal")
     }
 
+    val data by resFlow.collectAsState()
 
-//    LazyColumn {
-//        items(response.records) {
-//
-//        }
-//
-//    }
-
+    LazyColumn {
+        if (data is RecordState.Fetched) {
+            items((data as RecordState.Fetched).data.size) {
+                Text((data as RecordState.Fetched).data[it].toString())
+            }
+        }
+    }
 }

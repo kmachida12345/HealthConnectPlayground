@@ -85,10 +85,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, onClickButton: () -> Unit) {
+fun Greeting(name: String, onClickButton: () -> Unit, navigateToAnnualScreen: () -> Unit) {
     Column {
         Button(onClick = { onClickButton() }) {
             Text(text = "Hello $name!")
+
+        }
+        Button(onClick = { navigateToAnnualScreen() }) {
+            Text(text = "Hello $name! see annual records")
 
         }
     }
@@ -98,6 +102,6 @@ fun Greeting(name: String, onClickButton: () -> Unit) {
 @Composable
 fun DefaultPreview() {
     HealthConnectPlaygroundTheme {
-        Greeting("Android") {}
+        Greeting("Android", {}, {})
     }
 }
